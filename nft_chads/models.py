@@ -21,7 +21,7 @@ now = datetime.now()
 print("now =", now)
 
 # dd/mm/YY H:M:S
-dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+dt_string = now.strftime("%d/%m/%Y")
 
 Base = declarative_base()
 
@@ -75,11 +75,13 @@ class NftChads(Base):
 
 
 
-class NftChadsFollows(Base):
+class NftChadsFollowsT(Base):
     __tablename__ = f'NftChadsFollows'
+
 
     ID = Column(Integer, primary_key=True)
     parent_nft_chad_id = Column('parent_nft_chad_id', String(225), unique=False)
+    date_scraped= Column('date_scraped', DateTime, unique=False)
     created_at= Column('created_at', DateTime, unique=False)
     description= Column('description', String(225), unique=False)
     entities = Column('entities', JSONB, unique=False)
@@ -95,4 +97,13 @@ class NftChadsFollows(Base):
     tweet_count= Column('tweet_count', Integer, unique=False)
     url = Column('url', JSONB, unique=False)
     screen_name= Column('screen_name', String(225), unique=False)
+    # follow_index= Column('follow_index', Integer, unique=False)
     withheld= Column('withheld', JSONB, unique=False)
+
+
+# class account_counts(Base):
+#     __tablename__ = f'account_counts'
+#     ID = Column(Integer, primary_key=True)
+#     date_scraped= Column('date_scraped', DateTime, unique=False)
+#     count= Column('count', BigInteger, unique=False)
+#     screen_name= Column('screen_name', String(225), unique=False)

@@ -7,8 +7,9 @@
 from sqlalchemy.orm import sessionmaker
 from scrapy.exceptions import DropItem
 
-from nft_chads.models import db_connect, create_table, NftChadsFollows, NftChads
+from nft_chads.models import db_connect, create_table, NftChadsFollowsT, NftChads, now
 from nft_chads.items import NftChadsItem, NftChadsFollowsItem
+import pandas as pd
 
 
 import logging
@@ -24,6 +25,55 @@ class NftChadsPipeline(object):
         create_table(engine)
         self.Session = sessionmaker(bind=engine)
 
+
+    def close_spider(self, spider):
+
+        # insert into account_counts(screen_name, date_scraped, result)
+        # select screen_name, date_scraped, count(distinct parent_nft_chad_id) as result
+        # from NftChadsFollows
+        # group by screen_name, date_scraped;
+        #
+        #
+        # select screen_name, count(distinct parent_nft_chad_id)
+        # from public."NftChadsFollows_10/05/2022 23:53:06"
+        # group by screen_name;
+
+
+        # DROP TABLE IF EXISTS account_counts;
+        # CREATE TABLE account_counts AS
+        #     select screen_name, date_scraped, count(distinct parent_nft_chad_id) as result
+        #     from NftChadsFollows
+        #     group by screen_name, date_scraped;
+        # DROP TABLE IF EXISTS account_counts;
+        # CREATE TABLE account_counts AS
+        #     select screen_name, date_scraped, count(distinct parent_nft_chad_id) as result
+        #     from NftChadsFollows
+        #     group by screen_name, date_scraped;
+
+
+
+        session = self.Session()
+        print('Spider Closed')
+        query = """
+        DROP TABLE IF EXISTS account_count;
+        CREATE TABLE account_count AS
+            select screen_name, date_scraped, count(distinct parent_nft_chad_id) as result
+            from "NftChadsFollows"
+            group by screen_name, date_scraped;
+        """
+
+        # insert into account_counts(screen_name, date_scraped, count)
+        # select screen_name, date_scraped, count(distinct parent_nft_chad_id)
+        #     from NftChadsFollows
+        #     group by screen_name, date_scraped;
+
+
+        session.execute(query)
+        print('query executed')
+        #
+        # pd.read_sql(session.query(Complaint).filter(Complaint.id == 2).statement,session.bind)
+
+
     def process_item(self, item, spider):
 
         """Save quotes in the database
@@ -33,6 +83,12 @@ class NftChadsPipeline(object):
         # print(type(item).__name__)
         # print(item)
         if type(item).__name__ == 'NftChadsItem':
+
+            # if chad exists update recods with up-to-date-startingTimestampsUni
+            # session = self.Session()
+            #
+            # chad_exists = session.query(exists().where( NftChadsFollows.parent_nft_chad_id==user['id'])).scalar()
+            # session.close()
 
             nft_chads = NftChads()
 
@@ -59,7 +115,7 @@ class NftChadsPipeline(object):
 
         elif type(item).__name__ == 'NftChadsFollowsItem':
             print('got NftChadsFollowsItem')
-            nft_chads_follows = NftChadsFollows()
+            nft_chads_follows = NftChadsFollowsT()
             nft_chads_follows.parent_nft_chad_id =item['parent_nft_chad_id']
             nft_chads_follows.created_at = item['created_at']
             nft_chads_follows.description= item['description']
@@ -69,6 +125,8 @@ class NftChadsPipeline(object):
             nft_chads_follows.name= item['name']
             nft_chads_follows.pinned_tweet_id= item['pinned_tweet_id']
             # nft_chads_follows.profile_image_url= item['profile_image_url']
+
+            nft_chads_follows.date_scraped=now
             nft_chads_follows.protected= item['protected']
             nft_chads_follows.followers_count= item['followers_count']
             nft_chads_follows.following_count= item['following_count']

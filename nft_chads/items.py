@@ -40,7 +40,7 @@ class NftChadsItem(scrapy.Item):
 class NftChadsFollowsItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
-    
+
     parent_nft_chad_id = scrapy.Field()
     description = scrapy.Field()
     created_at = scrapy.Field()
@@ -51,6 +51,7 @@ class NftChadsFollowsItem(scrapy.Item):
     pinned_tweet_id= scrapy.Field() ## this is new
     profile_image_url= scrapy.Field() ## this is new
     protected = scrapy.Field()
+    date_scraped= scrapy.Field()
     # public_metrics = scrapy.Field() ## this is new
     followers_count = scrapy.Field()
     following_count = scrapy.Field()## this is new
